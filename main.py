@@ -1,16 +1,11 @@
-from fitgirl import fitgirl_search, fitgirl_game_info
+from fitgirl import fitgirl_search, fitgirl_get_downloadlink
 
 # Specify the DNS server and the domain
 game = input("Enter the game you want to search for: ")
 
 games = fitgirl_search(game)
 
+game = games[0]
+link = fitgirl_get_downloadlink(game)
 
-for game in games:
-    print("----------------")
-    print(game)
-    print("----------------")
-
-#game = games[0]
-#game_details = fitgirl_game_info(game)
-#print(game_details)
+print(link)

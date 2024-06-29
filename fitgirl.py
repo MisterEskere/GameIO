@@ -10,7 +10,7 @@ resolver.nameservers = [dns_server]
 ip_address = resolver.resolve(domain, 'A')[0].to_text()
 headers = {'Host': domain}
 
-def fitgirl_search(game):
+def fitgirl_search(game : str):
     """
     Search for a game on the FitGirl Repacks website and return the results.
     :param game: The game to search for.
@@ -43,6 +43,7 @@ def fitgirl_search(game):
     
         # link of the game
         link = entry_summary_a['href']
+        link = link.replace(domain, ip_address)
         
         # name of the game
         name = entry_summary_a.find('span', class_='screen-reader-text').text
@@ -106,11 +107,11 @@ def fitgirl_search(game):
     
     return games
 
-def fitgirl_game_info(game):
+def fitgirl_get_downloadlink(game : Game):
     """
-    Get detailed information about a game from the FitGirl Repacks website.
-    :param game: The Game object to get information for.
-    :return: The Game object with additional information.
+    Get the download link for a game from the FitGirl Repacks website.
+    :param game: The Game object to get the download link for.
+    :return: The download link.
     """
 
     # Make the request to the game's page
@@ -123,11 +124,13 @@ def fitgirl_game_info(game):
     except:
         response = requests.get(url, headers=headers, verify=False)
 
-    # !!! export the output to a file !!!
-    with open('game_ditails.html', 'w') as file:
-        file.write(response.text)
-
-    # game data extraction
+    # game download link extraction
     soup = BeautifulSoup(response.text, 'html.parser')
     article = soup.find('article')
-    return article
+    entry_content = article.find('div', class_='entry-content')
+    ul_1 = entry_content.find_all('ul')[1]
+    li_1 = ul_1.find_all('li')
+    a_1 = li_1[0].find_all('a')[1]
+    link = a_1['href']
+
+    return link 

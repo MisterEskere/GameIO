@@ -1,15 +1,23 @@
-# class games with name and link attributes
-
 class Game:
-    def __init__(self, id, name, link, Genre, Companies, Lenguages, GameSize, DownloadSize):
+    """
+    A class to represent a game with various properties.
+    """
+    def __init__(self, id: int, name: str, link: str, genres: list, companies: list, languages: list, game_size: str, download_size: str):
         self.id = id
         self.name = name
         self.link = link
-        self.Genres = Genre
-        self.Companies = Companies
-        self.Lenguages = Lenguages
-        self.GameSize = GameSize
-        self.DownloadSize = DownloadSize
-        
+        self.genres = genres
+        self.companies = companies
+        self.languages = languages
+        self.game_size = game_size
+        self.download_size = download_size
+        self.magnet_link = ""
+
     def __str__(self):
-        return f"ID: {self.id}\nName: {self.name}\nLink: {self.link}\nGenres: {self.Genres}\nCompanies: {self.Companies}\nLenguages: {self.Lenguages}\nGame Size: {self.GameSize}\nDownload Size: {self.DownloadSize}"
+        return f"ID: {self.id}\nName: {self.name}\nLink: {self.link}\nGenres: {self.genres}\nCompanies: {self.companies}\nLanguages: {self.languages}\nGame Size: {self.game_size}\nDownload Size: {self.download_size}"
+
+    def update_magnet_link(self, magnet_link: str):
+        """
+        Updates the magnet link of the game.
+        """
+        self.magnet_link = magnet_link
