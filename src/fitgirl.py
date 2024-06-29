@@ -1,7 +1,7 @@
 import requests
 import dns.resolver
 from bs4 import BeautifulSoup
-from src.game import Game
+from game import Game
 
 dns_server = '8.8.8.8'
 domain = 'fitgirl-repacks.site'

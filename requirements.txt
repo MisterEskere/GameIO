@@ -4,6 +4,7 @@ charset-normalizer==3.3.2
 dnspython==2.6.1
 idna==3.7
 libtorrent==2.0.9
+python-dotenv==1.0.1
 requests==2.32.3
 soupsieve==2.5
 urllib3==2.2.2
