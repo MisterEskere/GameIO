@@ -44,32 +44,17 @@ def download_game(link):
         
         while handle.status().state != lt.torrent_status.seeding:
             s = handle.status()
-            
+    
             # retrive all the information about the torrent
             donload_speed = s.download_rate / 1000000
             progress = s.progress * 100
-            remaining_time = s.total_wanted - s.total_wanted_done
-            
-            print(f"Download Speed: {donload_speed:.2f} MB/s | Progress: {progress:.2f}% | Remaining Time: {remaining_time} seconds")
+
+            print(f"Download Speed: {donload_speed:.2f} MB/s | Progress: {progress:.2f}%")
             
             time.sleep(1)
     except Exception as e:
         print(f"An error occurred: {e}")
         return False
 
+    print("Download completed.")
     return True
-
-def save_page_error(error, page):
-    """
-    This function is used to save pages that caused errors with the name of the error.
-
-    Args:
-        error (str): The error that occurred.
-        page (str): The page that caused the error.
-
-    Returns:
-        None
-    """
-
-    with open(f'error_{error}.html', 'w') as file:
-        file.write(str(page))

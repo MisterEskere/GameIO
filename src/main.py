@@ -1,30 +1,26 @@
-import libtorrent as lt
 from fitgirl import fitgirl_search, fitgirl_get_downloadlink
-import dotenv
-import time
 from downloader import download_game
+import threading
+from database import create_db
 
-# Load the environment variables
-dotenv.load_dotenv()
+# Create the database
+create_db()
 
-# Specify the DNS server and the domain
-game = input("Enter the game you want to search for: ")
+def download_game_threaded(link):
+    thread = threading.Thread(target=download_game, args=(link,))
+    thread.start()
 
-games = fitgirl_search(game)
-print("Games found:")
-print(len(games))
+while True:
+    game = input("Enter the game you want to search for: ")
 
-for game in games:
-    print(game)
+    games = fitgirl_search(game)
 
-input("Press Enter to continue...")
+    if len(games) == 0:
+        print("No games found.")
+        exit()
 
-if len(games) == 0:
-    print("No games found.")
-    exit()
+    game = games[0]
+    link = fitgirl_get_downloadlink(game)
 
-game = games[0]
-link = fitgirl_get_downloadlink(game)
-
-# download the game
-download_game(link)
+    # download the game
+    download_game_threaded(link)

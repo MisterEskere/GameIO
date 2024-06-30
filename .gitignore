@@ -3,5 +3,9 @@ __pycache__/
 .env
 
 
-# exclude all files in the bugs_html directory
-bugs_html/*
+# exclude the bugs_htmls folder and its contents
+bugs_htmls/
+```
+
+# exclude the database.sqlite file
+database.sqlite
