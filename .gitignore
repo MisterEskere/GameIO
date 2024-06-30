@@ -1,3 +1,7 @@
 __pycache__/
 
 .env
+
+
+# exclude all files in the bugs_html directory
+bugs_html/*

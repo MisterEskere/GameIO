@@ -2,7 +2,9 @@ import requests
 import dns.resolver
 from bs4 import BeautifulSoup
 from game import Game
+import uuid
 
+# set data for web scraping
 dns_server = '8.8.8.8'
 domain = 'fitgirl-repacks.site'
 resolver = dns.resolver.Resolver()
@@ -10,6 +12,7 @@ resolver.nameservers = [dns_server]
 ip_address = resolver.resolve(domain, 'A')[0].to_text()
 headers = {'Host': domain}
 
+#------------------------------------------------------------
 def fitgirl_search(game : str):
     """
     Search for a game on the FitGirl Repacks website and return the results.
@@ -17,89 +20,125 @@ def fitgirl_search(game : str):
     :return: A list of Game objects.
     """
 
-    # Create the URL with the IP address and set the Host header to the original domain
+    # connect to the website with the search query
     url = f"https://{ip_address}/?s={game}"
 
-    # Make the request
+    # Make the request to get the page
     try:
         response = requests.get(url, headers=headers, verify=True)
     except:
         response = requests.get(url, headers=headers, verify=False)
 
-    # print all the <article> tags
-    soup = BeautifulSoup(response.text, 'html.parser')
-    articles = soup.find_all('article')
-    games = []
-    for article in articles:
+    # Web scraping
+        soup = BeautifulSoup(response.text, 'html.parser')
         
-        # id of the game
-        id = article['id']
-        id = id.replace('post-', '')
+        try:
+            articles = soup.find_all('article')
+        except:
+            pages_bug("missing_articles", response.text)
+            return False
 
-        # data about the game
-        entry_summary = article.find('div', class_='entry-summary')
-        entry_summary_a = entry_summary.find('a')
-        entry_summary_p = entry_summary.find('p').text
-    
-        # link of the game
-        link = entry_summary_a['href']
-        link = link.replace(domain, ip_address)
-        
-        # name of the game
-        name = entry_summary_a.find('span', class_='screen-reader-text').text
+        games = []
+        for article in articles:
+            # id of the game
+            
+            try:
+                id = article['id']
+                id = id.replace('post-', '')
+            except:
+                pages_bug("missing_id", article)
+                continue
 
-        # genre of the game
-        # look for "Genres/Tags:" text in the entry_summary_p
-        # if founnd get the position of the text
-        if "Genres/Tags:" in entry_summary_p:
-            genres_start = entry_summary_p.find("Genres/Tags:")
+            # main information about the game
+            
+            try:
+                entry_summary = article.find('div', class_='entry-summary')
+            except:
+                pages_bug("missing_entry_summary", article)
+                continue
 
-        if "Companies:" in entry_summary_p:
-            companies_start = entry_summary_p.find("Companies:")
-        if "Company:" in entry_summary_p:
-            companies_start = entry_summary_p.find("Company:")
+            # link and name of the game
+            try:
+                entry_summary_a = entry_summary.find('a')
+            except:
+                pages_bug("missing_entry_summary_a", entry_summary)
+                continue
 
-        if "Language:" in entry_summary_p:
-            lenguages_start = entry_summary_p.find("Language:")
-        if "Languages:" in entry_summary_p:
-            lenguages_start = entry_summary_p.find("Languages:")
+            # link of the game
+            try:
+                link = entry_summary_a['href']
+                link = link.replace(domain, ip_address)
+            except:
+                pages_bug("missing_link", entry_summary_a)
+                continue
 
-        if "Original Size:" in entry_summary_p:
-            game_size_start = entry_summary_p.find("Original Size:")
-        if "Repack Size:" in entry_summary_p:
-            download_size_start = entry_summary_p.find("Repack Size:")
-        if "Download Mirrors" in entry_summary_p:
-            download_size_end = entry_summary_p.find("Download Mirrors")
+            # name of the game
+            try:
+                name = entry_summary_a.find('span', class_='screen-reader-text').text
+            except:
+                pages_bug("missing_name", entry_summary_a)
+                continue
 
-        # get the genres
-        genres = entry_summary_p[genres_start:companies_start]
-        genres = genres.replace("Genres/Tags:", "")
-        genres = genres.split(',')
-        genres = [genre.strip() for genre in genres]
+            # information about the game
+            try:
+                entry_summary_p = entry_summary.find('p').text
+            except:
+                pages_bug("missing_entry_summary_p", entry_summary)
+                continue
 
-        # get the companies
-        companies = entry_summary_p[companies_start:lenguages_start]
-        companies = companies.replace("Companies:", "")
-        companies = companies.replace("Company:", "")
-        companies = companies.split(',')
-        companies = [company.strip() for company in companies]
-        
-        # get the lenguages
-        lenguages = entry_summary_p[lenguages_start:game_size_start]
-        lenguages = lenguages.replace("Languages:", "")
-        lenguages = lenguages.replace("Language:", "")
-        lenguages = lenguages.split('/')
-        lenguages = [lenguage.strip() for lenguage in lenguages]
-        
-        # get the game size
-        game_size = entry_summary_p[game_size_start:download_size_start]
-        game_size = game_size.replace("Original Size:", "")
-        game_size = game_size.strip()
-        
-        # get the download size
-        download_size = entry_summary_p[download_size_start:download_size_end]
-        download_size = download_size.replace("Repack Size:", "")
-        download_size = download_size.strip()
+            try:
+                if "Genres/Tags:" in entry_summary_p:
+                    genres_start = entry_summary_p.find("Genres/Tags:")
+
+                if "Companies:" in entry_summary_p:
+                    companies_start = entry_summary_p.find("Companies:")
+                if "Company:" in entry_summary_p:
+                    companies_start = entry_summary_p.find("Company:")
+
+                if "Language:" in entry_summary_p:
+                    lenguages_start = entry_summary_p.find("Language:")
+                if "Languages:" in entry_summary_p:
+                    lenguages_start = entry_summary_p.find("Languages:")
+
+                if "Original Size:" in entry_summary_p:
+                    game_size_start = entry_summary_p.find("Original Size:")
+                if "Repack Size:" in entry_summary_p:
+                    download_size_start = entry_summary_p.find("Repack Size:")
+                if "Download Mirrors" in entry_summary_p:
+                    download_size_end = entry_summary_p.find("Download Mirrors")
+
+                # get the genres
+                genres = entry_summary_p[genres_start:companies_start]
+                genres = genres.replace("Genres/Tags:", "")
+                genres = genres.split(',')
+                genres = [genre.strip() for genre in genres]
+
+                # get the companies
+                companies = entry_summary_p[companies_start:lenguages_start]
+                companies = companies.replace("Companies:", "")
+                companies = companies.replace("Company:", "")
+                companies = companies.split(',')
+                companies = [company.strip() for company in companies]
+                
+                # get the lenguages
+                lenguages = entry_summary_p[lenguages_start:game_size_start]
+                lenguages = lenguages.replace("Languages:", "")
+                lenguages = lenguages.replace("Language:", "")
+                lenguages = lenguages.split('/')
+                lenguages = [lenguage.strip() for lenguage in lenguages]
+                
+                # get the game size
+                game_size = entry_summary_p[game_size_start:download_size_start]
+                game_size = game_size.replace("Original Size:", "")
+                game_size = game_size.strip()
+                
+                # get the download size
+                download_size = entry_summary_p[download_size_start:download_size_end]
+                download_size = download_size.replace("Repack Size:", "")
+                download_size = download_size.strip()
+            except:
+                pages_bug("missing_information", entry_summary_p)
+                continue
 
         # create a Game object and append it to the games list
         game = Game(id, name, link, genres, companies, lenguages, game_size, download_size)
@@ -107,6 +146,7 @@ def fitgirl_search(game : str):
     
     return games
 
+# ------------------------------------------------------------
 def fitgirl_get_downloadlink(game : Game):
     """
     Get the download link for a game from the FitGirl Repacks website.
@@ -125,12 +165,60 @@ def fitgirl_get_downloadlink(game : Game):
         response = requests.get(url, headers=headers, verify=False)
 
     # game download link extraction
-    soup = BeautifulSoup(response.text, 'html.parser')
-    article = soup.find('article')
-    entry_content = article.find('div', class_='entry-content')
-    ul_1 = entry_content.find_all('ul')[1]
-    li_1 = ul_1.find_all('li')
-    a_1 = li_1[0].find_all('a')[1]
-    link = a_1['href']
+    try:
+        try:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            article = soup.find('article')
+        except:
+            pages_bug("missing_article", response.text)
+            return False
 
-    return link 
+        try:
+            entry_content = article.find('div', class_='entry-content')
+        except:
+            pages_bug("missing_entry_content", article)
+            return False
+    
+        try:
+            ul_1 = entry_content.find_all('ul')[1]
+        except:
+            pages_bug("missing_ul_1", entry_content)
+            return False
+    
+        try:
+            li_1 = ul_1.find_all('li')
+        except:
+            pages_bug("missing_li_1", ul_1)
+            return False
+    
+        try:
+            a_1 = li_1[0].find_all('a')[1]
+        except:
+            pages_bug("missing_a_1", li_1)
+            return False    
+        
+        try:
+            link = a_1['href']
+        except:
+            pages_bug("missing_link", a_1)
+            return False
+
+    except Exception as e:
+        pages_bug(e, response.text)
+        return False
+
+    return link
+
+# ------------------------------------------------------------
+def pages_bug(error, page):
+    """
+    This function is used to save pages that caused errors with the name of the error"
+    """
+
+    random_id = uuid.uuid4()
+    name = f'bugs_htmls/error_{error}_{random_id}.html'
+
+    with open(f'{name}', 'w') as file:
+        file.write(str(page))
+
+    return name
