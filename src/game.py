@@ -2,7 +2,7 @@ class Game:
     """
     A class to represent a game with various properties.
     """
-    def __init__(self, id: int, name: str, link: str, genres: list, companies: list, languages: list, game_size: str, download_size: str):
+    def __init__(self, id: str, name: str, link: str, genres: list, companies: list, languages: list, game_size: str, download_size: str):
         self.id = id
         self.name = name
         self.link = link

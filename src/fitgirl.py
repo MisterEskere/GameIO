@@ -3,6 +3,7 @@ import dns.resolver
 from bs4 import BeautifulSoup
 from game import Game
 import uuid
+import os
 
 # set data for web scraping
 dns_server = '8.8.8.8'
@@ -39,20 +40,28 @@ def fitgirl_search(game : str):
             return False
 
         games = []
-        for article in articles:
+        for i, article in enumerate(articles):
+
             # id of the game
-            
             try:
                 id = article['id']
-                id = id.replace('post-', '')
             except:
                 pages_bug("missing_id", article)
                 continue
 
-            # main information about the game
-            
+            # check if the article is a game
+            try:
+                category = article.find('span', class_='cat-links').text
+                if category != 'Lossless Repack':
+                    raise ValueError("Not a game")
+            except:
+                pages_bug("not_a_game", article)
+                continue
+
             try:
                 entry_summary = article.find('div', class_='entry-summary')
+                if entry_summary is None:
+                    raise ValueError("No entry_summary")
             except:
                 pages_bug("missing_entry_summary", article)
                 continue
@@ -60,6 +69,8 @@ def fitgirl_search(game : str):
             # link and name of the game
             try:
                 entry_summary_a = entry_summary.find('a')
+                if entry_summary_a is None:
+                    raise ValueError("No entry_summary_a")
             except:
                 pages_bug("missing_entry_summary_a", entry_summary)
                 continue
@@ -82,6 +93,8 @@ def fitgirl_search(game : str):
             # information about the game
             try:
                 entry_summary_p = entry_summary.find('p').text
+                if entry_summary_p is None:
+                    raise ValueError("No entry_summary_p")
             except:
                 pages_bug("missing_entry_summary_p", entry_summary)
                 continue
@@ -140,9 +153,9 @@ def fitgirl_search(game : str):
                 pages_bug("missing_information", entry_summary_p)
                 continue
 
-        # create a Game object and append it to the games list
-        game = Game(id, name, link, genres, companies, lenguages, game_size, download_size)
-        games.append(game)
+            # create a Game object and append it to the games list
+            game = Game(id, name, link, genres, companies, lenguages, game_size, download_size)
+            games.append(game)
     
     return games
 
@@ -216,9 +229,14 @@ def pages_bug(error, page):
     """
 
     random_id = uuid.uuid4()
-    name = f'bugs_htmls/error_{error}_{random_id}.html'
+    directory = 'bugs_htmls'
+    name = f'{directory}/error_{error}_{random_id}.html'
 
-    with open(f'{name}', 'w') as file:
+    # Check if the directory exists, if not create it
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    with open(name, 'w') as file:
         file.write(str(page))
 
     return name
