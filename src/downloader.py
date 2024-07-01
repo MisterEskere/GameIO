@@ -1,6 +1,7 @@
 import libtorrent as lt
 import dotenv
 import time
+import threading
 
 # get the download path from the environment variables
 env = dotenv.dotenv_values()
@@ -20,6 +21,9 @@ ses_settings = {
     'download_rate_limit': -1,
     'upload_rate_limit': -1
 }
+
+def download_game_threaded(link):
+    threading.Thread(target=download_game, args=(link,)).start()
 
 def download_game(link):
     """

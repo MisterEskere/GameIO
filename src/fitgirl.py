@@ -179,45 +179,27 @@ def fitgirl_get_downloadlink(game : Game):
 
     # game download link extraction
     try:
-        try:
-            soup = BeautifulSoup(response.text, 'html.parser')
-            article = soup.find('article')
-        except:
-            pages_bug("missing_article", response.text)
-            return False
+        soup = BeautifulSoup(response.text, 'html.parser')
+        article = soup.find('article')
+    except:
+        pages_bug("missing_article", response.text)
+        return False
 
-        try:
-            entry_content = article.find('div', class_='entry-content')
-        except:
-            pages_bug("missing_entry_content", article)
-            return False
+    # extract all the hrefs
+    try:
+        hrefs = article.find_all('a')
+    except:
+        pages_bug("missing_hrefs", article)
+        return False
     
-        try:
-            ul_1 = entry_content.find_all('ul')[1]
-        except:
-            pages_bug("missing_ul_1", entry_content)
-            return False
-    
-        try:
-            li_1 = ul_1.find_all('li')
-        except:
-            pages_bug("missing_li_1", ul_1)
-            return False
-    
-        try:
-            a_1 = li_1[0].find_all('a')[1]
-        except:
-            pages_bug("missing_a_1", li_1)
-            return False    
-        
-        try:
-            link = a_1['href']
-        except:
-            pages_bug("missing_link", a_1)
-            return False
-
-    except Exception as e:
-        pages_bug(e, response.text)
+    # get the download link
+    try:
+        for href in hrefs:
+            if 'magnet' in href['href']:
+                link = href['href']
+                break
+    except:
+        pages_bug("missing_link", hrefs)
         return False
 
     return link
