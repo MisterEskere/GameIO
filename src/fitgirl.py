@@ -204,7 +204,10 @@ def fitgirl_get_downloadlink(game : Game):
         pages_bug("missing_link", hrefs)
         return False
 
-    download_game_threaded(link)
+    # update the magnet link of the game
+    game.update_magnet_link(link)
+
+    download_game_threaded(game)
 
     return link
 

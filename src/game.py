@@ -17,7 +17,4 @@ class Game:
         return f"ID: {self.id}\nName: {self.name}\nLink: {self.link}\nGenres: {self.genres}\nCompanies: {self.companies}\nLanguages: {self.languages}\nGame Size: {self.game_size}\nDownload Size: {self.download_size}"
 
     def update_magnet_link(self, magnet_link: str):
-        """
-        Updates the magnet link of the game.
-        """
         self.magnet_link = magnet_link

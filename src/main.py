@@ -14,8 +14,8 @@ def update_search_results(query, list_widget):
 
 def update_download_status(download_status_list):
     download_status_list.clear()  # Clear existing items
-    for status in download_status:
-        download_status_list.addItem(status)
+    for game, status in download_status.items():
+        download_status_list.addItem(f'{game}: {status}')
 
 def create_window():
     app = QApplication([])
