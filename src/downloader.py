@@ -3,6 +3,8 @@ import dotenv
 import time
 import threading
 
+download_status = []
+
 # get the download path from the environment variables
 env = dotenv.dotenv_values()
 download_path = env.get("DOWNLOAD_PATH")
@@ -36,6 +38,9 @@ def download_game(link):
         None
     """
 
+    download_status.append("Downloading...")
+    position = len(download_status) - 1
+
     try:
         params = lt.parse_magnet_uri(link)
         params.save_path = download_path
@@ -53,7 +58,7 @@ def download_game(link):
             donload_speed = s.download_rate / 1000000
             progress = s.progress * 100
 
-            print(f"Download Speed: {donload_speed:.2f} MB/s | Progress: {progress:.2f}%")
+            download_status[position] = f"Download Speed: {donload_speed:.2f} MB/s | Progress: {progress:.2f}%"
             
             time.sleep(1)
     except Exception as e:

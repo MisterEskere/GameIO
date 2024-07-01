@@ -5,6 +5,8 @@ from game import Game
 import uuid
 import os
 
+from downloader import download_game_threaded
+
 # set data for web scraping
 dns_server = '8.8.8.8'
 domain = 'fitgirl-repacks.site'
@@ -201,6 +203,8 @@ def fitgirl_get_downloadlink(game : Game):
     except:
         pages_bug("missing_link", hrefs)
         return False
+
+    download_game_threaded(link)
 
     return link
 
